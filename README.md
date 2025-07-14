@@ -86,4 +86,3 @@ package-solution.json -> paths -> zippedPackage
 
 SpDataAccessWebPart.manifest.json -> id 
 HelloWorldWebPart.manifest.json -> id
-

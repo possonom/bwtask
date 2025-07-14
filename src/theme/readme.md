@@ -147,4 +147,3 @@ const Sample: React.FC<Props> = (props) => {
 }
 
 ```
-

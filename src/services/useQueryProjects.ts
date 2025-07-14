@@ -65,4 +65,3 @@ export const useQueryProjects = () => {
 
   return { data, isLoading, isError, error };    
 };
-
