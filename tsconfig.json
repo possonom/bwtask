@@ -2,25 +2,30 @@
   "compilerOptions": {
     "target": "es5",
     "forceConsistentCasingInFileNames": true,
-    "module": "esnext",
+    "module": "commonjs",
     "moduleResolution": "node",
-    "jsx": "react",
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
     "declaration": true,
     "sourceMap": true,
     "experimentalDecorators": true,
     "skipLibCheck": true,
+    "lib": [
+      "es5",
+      "dom",
+      "es2015.collection",
+      "es2015.promise"
+    ],
     "typeRoots": [
       "./node_modules/@types",
       "./node_modules/@microsoft"
     ],
     "types": [
       "es6-promise",
-      "webpack-env"
-    ],
-    "lib": [
-      "es6",
-      "es2016",
-      "dom",
+      "es6-collections",
+      "webpack-env",
+      "react",
+      "react-dom"
     ]
   }
 }

@@ -4,7 +4,34 @@
     "name": "spfx-template-client-side-solution",
     "id": "bb47a40c-ffa7-4437-a2d3-d681346c85a2",
     "version": "1.0.0.0",
-    "includeClientSideAssets": true
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "SPFx Developer",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": ""
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "SPFx Template with React 17 for SharePoint 2019"
+      },
+      "longDescription": {
+        "default": "SharePoint Framework web part template with React 17 forced for SharePoint 2019 on-premise environments. Features modern React patterns, Zustand state management, and custom data hooks."
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": ["React", "SharePoint 2019", "SPFx"]
+    },
+    "features": [
+      {
+        "title": "React 17 Support",
+        "description": "Modern React 17 patterns in SharePoint 2019",
+        "id": "bb47a40c-ffa7-4437-a2d3-d681346c85a2-react17",
+        "version": "1.0.0.0"
+      }
+    ]
   },
   "paths": {
     "zippedPackage": "solution/spfx-template.sppkg"

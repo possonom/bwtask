@@ -1,6 +1,6 @@
-import { ITheme } from "@fluentui/react/lib/Styling";
+import { WebPartContext } from '@microsoft/sp-webpart-base';
 
 export interface IHelloWorldProps {
-  theme: ITheme;
   description: string;
+  context: WebPartContext;
 }

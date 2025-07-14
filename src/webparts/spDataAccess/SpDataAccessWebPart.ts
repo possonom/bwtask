@@ -1,62 +1,101 @@
 import * as React from 'react';
 import * as ReactDom from 'react-dom';
-
+import { Version } from '@microsoft/sp-core-library';
 import {
-  BaseClientSideWebPart,
   IPropertyPaneConfiguration,
   PropertyPaneTextField
-} from '@microsoft/sp-webpart-base';
+} from '@microsoft/sp-property-pane';
+import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
+import { IReadonlyTheme } from '@microsoft/sp-component-base';
 
 import * as strings from 'SpDataAccessWebPartStrings';
-import SpDataAccess from './components/SpDataAccess';
+import SpDataAccessWithZustand from './components/SpDataAccessWithZustand';
 import { ISpDataAccessProps } from './components/ISpDataAccessProps';
-
-import { sp } from '@pnp/sp';
-import {  Logger, ConsoleListener, LogLevel } from "@pnp/logging";
-
-import { PackageSolution } from '../../interfaces/PackageSolution';
-import { ITheme } from '@fluentui/react/lib/Styling';
-import { loadCustomTheme } from '../../theme/customTheme';
-
-const packageSolution: PackageSolution = require("../../../config/package-solution.json");
 
 export interface ISpDataAccessWebPartProps {
   description: string;
 }
 
 export default class SpDataAccessWebPart extends BaseClientSideWebPart<ISpDataAccessWebPartProps> {
-  private theme: ITheme;
-  // we need to make sure to init pnp and its logger here
-  // for PROD we should set the LogLevel to Error
-  public async onInit(): Promise<void> {
-    this.theme = loadCustomTheme();
-    await super.onInit();
 
-    sp.setup({
-      spfxContext: this.context
-    });
-
-    Logger.subscribe(new ConsoleListener());
-    Logger.activeLogLevel = LogLevel.Info;   
-  }
+  private _isDarkTheme: boolean = false;
+  private _environmentMessage: string = '';
 
   public render(): void {
-    
-    Logger.write(`### INIT SpDataAccessWebPart, Version ${packageSolution.solution.version}`, LogLevel.Info); // to help testers identify the version
-    
-    const element: React.ReactElement<ISpDataAccessProps > = React.createElement(
-      SpDataAccess,
+    const element: React.ReactElement<ISpDataAccessProps> = React.createElement(
+      SpDataAccessWithZustand,
       {
-        theme:this.theme,
-        description: this.properties.description
+        description: this.properties.description,
+        isDarkTheme: this._isDarkTheme,
+        environmentMessage: this._environmentMessage,
+        hasTeamsContext: !!this.context.sdks.microsoftTeams,
+        userDisplayName: this.context.pageContext.user.displayName,
+        theme: this._currentTheme
       }
     );
 
     ReactDom.render(element, this.domElement);
   }
 
+  private _currentTheme: IReadonlyTheme | undefined;
+
+  protected onInit(): Promise<void> {
+    return this._getEnvironmentMessage().then(message => {
+      this._environmentMessage = message;
+    });
+  }
+
+  private _getEnvironmentMessage(): Promise<string> {
+    if (!!this.context.sdks.microsoftTeams) { // running in Teams, office.com or Outlook
+      return this.context.sdks.microsoftTeams.teamsJs.app.getContext()
+        .then(context => {
+          let environmentMessage: string = '';
+          switch (context.app.host.name) {
+            case 'Office': // running in Office
+              environmentMessage = this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentOffice : strings.AppOfficeEnvironment;
+              break;
+            case 'Outlook': // running in Outlook
+              environmentMessage = this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentOutlook : strings.AppOutlookEnvironment;
+              break;
+            case 'Teams': // running in Teams
+              environmentMessage = this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentTeams : strings.AppTeamsEnvironment;
+              break;
+            default:
+              throw new Error('Unknown host');
+          }
+
+          return environmentMessage;
+        });
+    }
+
+    return Promise.resolve(this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentSharePoint : strings.AppSharePointEnvironment);
+  }
+
+  protected onThemeChanged(currentTheme: IReadonlyTheme | undefined): void {
+    if (!currentTheme) {
+      return;
+    }
+
+    this._isDarkTheme = !!currentTheme.isInverted;
+    const {
+      semanticColors
+    } = currentTheme;
+
+    if (semanticColors) {
+      this.domElement.style.setProperty('--bodyText', semanticColors.bodyText || null);
+      this.domElement.style.setProperty('--link', semanticColors.link || null);
+      this.domElement.style.setProperty('--linkHovered', semanticColors.linkHovered || null);
+    }
+
+    this._currentTheme = currentTheme;
+  }
+
   protected onDispose(): void {
     ReactDom.unmountComponentAtNode(this.domElement);
+  }
+
+  protected get dataVersion(): Version {
+    return Version.parse('1.0');
   }
 
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {

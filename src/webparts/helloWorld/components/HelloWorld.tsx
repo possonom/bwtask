@@ -1,272 +1,169 @@
-import * as React from 'react';
-import { useState, useCallback } from 'react';
+import { useEffect } from 'react';
 import { IHelloWorldProps } from './IHelloWorldProps';
-import { 
-  CommandBar, 
-  ICommandBarItemProps, 
-  TextField, 
-  ThemeProvider,
-  Stack,
-  IStackTokens,
-  PrimaryButton,
-  DefaultButton,
-  MessageBar,
-  MessageBarType,
-  Spinner,
-  SpinnerSize,
-  Panel,
-  PanelType,
-  Toggle,
-  Dropdown,
-  IDropdownOption,
-  DetailsList,
-  DetailsListLayoutMode,
-  IColumn,
-  SelectionMode
-} from '@fluentui/react';
-import { ICommandBarSampleDropDownProps, CommandBarSampleDropDown } from './CommandBarSampleDropDown';
+import { useProjectsQuery } from '../../../hooks/useProjectData';
+import { useProjectStore } from '../../../stores/projectStore';
+import { Logger, LogLevel } from '@pnp/logging';
 
-interface ISampleData {
-  id: number;
-  name: string;
-  status: string;
-  date: Date;
-}
+const HelloWorld = ({ description, context }: IHelloWorldProps) => {
+  // Use React 17 with modern hooks for SharePoint 2019 compatibility
+  const projectsQuery = useProjectsQuery();
+  const { projects, isLoading, error } = useProjectStore();
 
-const HelloWorld: React.FC<IHelloWorldProps> = (props) => {
-  const { theme, description } = props;
-
-  const stackTokens: IStackTokens = { childrenGap: 20 };
-  const [counter, setCounter] = useState<number>(1);
-  const [userName, setUserName] = useState<string>('');
-  const [showMessage, setShowMessage] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isPanelOpen, setIsPanelOpen] = useState<boolean>(false);
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
-  const [selectedOption, setSelectedOption] = useState<string>('option1');
-
-  // Sample data for the list
-  const [sampleData] = useState<ISampleData[]>([
-    { id: 1, name: 'Project Alpha', status: 'Active', date: new Date('2024-01-15') },
-    { id: 2, name: 'Project Beta', status: 'Completed', date: new Date('2024-02-20') },
-    { id: 3, name: 'Project Gamma', status: 'Pending', date: new Date('2024-03-10') },
-    { id: 4, name: 'Project Delta', status: 'Active', date: new Date('2024-01-25') },
-  ]);
-
-  const onButtonClick = useCallback((): void => {
-    setCounter(prevState => prevState + 1);
-    setShowMessage(true);
-    setTimeout(() => setShowMessage(false), 3000);
-  }, []);
-
-  const onAsyncAction = useCallback(async (): Promise<void> => {
-    setIsLoading(true);
-    // Simulate async operation
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsLoading(false);
-    setShowMessage(true);
-    setTimeout(() => setShowMessage(false), 3000);
-  }, []);
-
-  const onUserNameChange = useCallback((event: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>, newValue?: string): void => {
-    setUserName(newValue || '');
-  }, []);
-
-  const onToggleChange = useCallback((event: React.MouseEvent<HTMLElement>, checked?: boolean): void => {
-    setIsDarkMode(checked || false);
-  }, []);
-
-  const dropdownOptions: IDropdownOption[] = [
-    { key: 'option1', text: 'Option 1' },
-    { key: 'option2', text: 'Option 2' },
-    { key: 'option3', text: 'Option 3' },
-  ];
-
-  const onDropdownChange = useCallback((event: React.FormEvent<HTMLDivElement>, option?: IDropdownOption): void => {
-    if (option) {
-      setSelectedOption(option.key as string);
+  useEffect(() => {
+    Logger.write('HelloWorld component mounted with React 17 for SharePoint 2019', LogLevel.Info);
+    
+    // Log React version for verification
+    if (typeof window !== 'undefined' && (window as any).React) {
+      Logger.write(`React version detected: ${(window as any).React.version}`, LogLevel.Info);
     }
   }, []);
 
-  // Command bar configuration
-  const dropdownSample: ICommandBarSampleDropDownProps = {
-    text: 'My View 1',
-    key: 'view1',
-    tooltipText: 'Switch between different views',
-    commandBarButtonAs: CommandBarSampleDropDown,
-  };
+  if (isLoading) {
+    return (
+      <div className="loading" style={{ padding: '20px', textAlign: 'center' }}>
+        <div>Loading projects...</div>
+        <div style={{ fontSize: '12px', color: '#666', marginTop: '10px' }}>
+          React 17 + SPFx 1.4.1 + SharePoint 2019
+        </div>
+      </div>
+    );
+  }
 
-  const commandBarItems: ICommandBarItemProps[] = [
-    {
-      key: 'new',
-      text: 'New',
-      iconProps: { iconName: 'Add' },
-      onClick: () => setIsPanelOpen(true),
-    },
-    {
-      key: 'refresh',
-      text: 'Refresh',
-      iconProps: { iconName: 'Refresh' },
-      onClick: onAsyncAction,
-    },
-  ];
-
-  const farItems: ICommandBarItemProps[] = [dropdownSample];
-
-  // DetailsList columns
-  const columns: IColumn[] = [
-    {
-      key: 'name',
-      name: 'Name',
-      fieldName: 'name',
-      minWidth: 150,
-      maxWidth: 200,
-      isResizable: true,
-    },
-    {
-      key: 'status',
-      name: 'Status',
-      fieldName: 'status',
-      minWidth: 100,
-      maxWidth: 150,
-      isResizable: true,
-      onRender: (item: ISampleData) => (
-        <span style={{ 
-          color: item.status === 'Active' ? '#107c10' : 
-                 item.status === 'Completed' ? '#0078d4' : '#d13438' 
-        }}>
-          {item.status}
-        </span>
-      ),
-    },
-    {
-      key: 'date',
-      name: 'Date',
-      fieldName: 'date',
-      minWidth: 120,
-      maxWidth: 180,
-      isResizable: true,
-      onRender: (item: ISampleData) => item.date.toLocaleDateString(),
-    },
-  ];
+  if (error) {
+    return (
+      <div className="error" style={{ padding: '20px', color: '#d13438' }}>
+        <strong>Error:</strong> {error}
+        <div style={{ fontSize: '12px', color: '#666', marginTop: '10px' }}>
+          React 17 error handling in SharePoint 2019
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <ThemeProvider theme={theme}>
-      <div style={{ padding: '20px', backgroundColor: isDarkMode ? '#1f1f1f' : '#ffffff' }}>
-        <h2>Hello World - SPFx Sample Component</h2>
-        <p>{description}</p>
-
-        {/* Command Bar */}
-        <CommandBar
-          items={commandBarItems}
-          farItems={farItems}
-          ariaLabel="Sample command bar"
-        />
-
-        {/* Message Bar */}
-        {showMessage && (
-          <MessageBar
-            messageBarType={MessageBarType.success}
-            isMultiline={false}
-            onDismiss={() => setShowMessage(false)}
-            dismissButtonAriaLabel="Close"
-          >
-            Action completed successfully! Counter is now: {counter}
-          </MessageBar>
-        )}
-
-        <Stack tokens={stackTokens}>
-          {/* Basic Controls */}
-          <Stack horizontal tokens={{ childrenGap: 20 }} verticalAlign="center">
-            <div>Counter: <strong>{counter}</strong></div>
-            <PrimaryButton 
-              data-testid="hw-main-btn-default" 
-              text="Increment" 
-              onClick={onButtonClick}
-              disabled={isLoading}
-            />
-            <DefaultButton 
-              text="Async Action" 
-              onClick={onAsyncAction}
-              disabled={isLoading}
-            />
-            {isLoading && <Spinner size={SpinnerSize.medium} />}
-          </Stack>
-
-          {/* Form Controls */}
-          <Stack horizontal tokens={{ childrenGap: 20 }}>
-            <TextField 
-              data-testid="hw-main-txt-name" 
-              label="User Name" 
-              value={userName}
-              onChange={onUserNameChange}
-              placeholder="Enter your name"
-              styles={{ root: { width: 200 } }}
-            />
-            <Dropdown
-              label="Select Option"
-              options={dropdownOptions}
-              selectedKey={selectedOption}
-              onChange={onDropdownChange}
-              styles={{ root: { width: 150 } }}
-            />
-            <Toggle
-              label="Dark Mode"
-              checked={isDarkMode}
-              onChange={onToggleChange}
-            />
-          </Stack>
-
-          {/* Greeting */}
-          {userName && (
-            <div style={{ 
-              padding: '10px', 
-              backgroundColor: isDarkMode ? '#333' : '#f3f2f1',
-              borderRadius: '4px'
-            }}>
-              Hello, <strong>{userName}</strong>! Welcome to SPFx development.
-            </div>
-          )}
-
-          {/* Data List */}
-          <div>
-            <h3>Sample Data List</h3>
-            <DetailsList
-              items={sampleData}
-              columns={columns}
-              layoutMode={DetailsListLayoutMode.justified}
-              selectionMode={SelectionMode.none}
-              isHeaderVisible={true}
-            />
-          </div>
-        </Stack>
-
-        {/* Panel */}
-        <Panel
-          headerText="New Item Panel"
-          isOpen={isPanelOpen}
-          onDismiss={() => setIsPanelOpen(false)}
-          type={PanelType.medium}
-          closeButtonAriaLabel="Close"
-        >
-          <Stack tokens={stackTokens}>
-            <TextField label="Item Name" placeholder="Enter item name" />
-            <Dropdown
-              label="Status"
-              options={[
-                { key: 'active', text: 'Active' },
-                { key: 'pending', text: 'Pending' },
-                { key: 'completed', text: 'Completed' },
-              ]}
-            />
-            <Stack horizontal tokens={{ childrenGap: 10 }}>
-              <PrimaryButton text="Save" onClick={() => setIsPanelOpen(false)} />
-              <DefaultButton text="Cancel" onClick={() => setIsPanelOpen(false)} />
-            </Stack>
-          </Stack>
-        </Panel>
+    <div className="helloWorld" style={{ padding: '20px', fontFamily: 'Segoe UI, sans-serif' }}>
+      <div style={{ 
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        color: 'white',
+        padding: '20px',
+        borderRadius: '8px',
+        marginBottom: '20px'
+      }}>
+        <h1 style={{ margin: '0 0 10px 0', fontSize: '24px' }}>
+          🚀 React 17 + SharePoint 2019!
+        </h1>
+        <p style={{ margin: '0', opacity: 0.9 }}>{description}</p>
+        <div style={{ 
+          fontSize: '12px', 
+          opacity: 0.8, 
+          marginTop: '10px',
+          padding: '8px 12px',
+          background: 'rgba(255,255,255,0.1)',
+          borderRadius: '4px',
+          display: 'inline-block'
+        }}>
+          ✅ React 17.0.2 • SPFx 1.4.1 • SharePoint 2019 On-Premise
+        </div>
       </div>
-    </ThemeProvider>
+
+      <div style={{ 
+        background: '#f8f9fa',
+        border: '1px solid #e9ecef',
+        borderRadius: '8px',
+        padding: '20px',
+        marginBottom: '20px'
+      }}>
+        <h2 style={{ margin: '0 0 15px 0', color: '#495057' }}>
+          📊 Projects ({projects.length})
+        </h2>
+        
+        {projects.length === 0 ? (
+          <div style={{ 
+            textAlign: 'center', 
+            padding: '40px 20px',
+            color: '#6c757d'
+          }}>
+            <div style={{ fontSize: '48px', marginBottom: '10px' }}>📝</div>
+            <p>No projects found. Create your first project!</p>
+            <div style={{ fontSize: '12px', marginTop: '10px' }}>
+              React 17 state management with Zustand
+            </div>
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gap: '10px' }}>
+            {projects.map((project) => (
+              <div 
+                key={project.Id}
+                style={{
+                  background: 'white',
+                  border: '1px solid #dee2e6',
+                  borderRadius: '6px',
+                  padding: '15px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}
+              >
+                <div>
+                  <strong style={{ color: '#212529' }}>{project.Name}</strong>
+                  <div style={{ fontSize: '12px', color: '#6c757d', marginTop: '4px' }}>
+                    Status: {project.Status} • Progress: {project.Progress || 0}%
+                  </div>
+                </div>
+                <div style={{
+                  background: project.Status === 'Completed' ? '#d4edda' : 
+                           project.Status === 'In Progress' ? '#d1ecf1' : '#f8d7da',
+                  color: project.Status === 'Completed' ? '#155724' : 
+                         project.Status === 'In Progress' ? '#0c5460' : '#721c24',
+                  padding: '4px 8px',
+                  borderRadius: '4px',
+                  fontSize: '12px',
+                  fontWeight: 'bold'
+                }}>
+                  {project.Status}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div style={{ 
+        background: '#e9ecef',
+        borderRadius: '8px',
+        padding: '20px'
+      }}>
+        <h3 style={{ margin: '0 0 15px 0', color: '#495057' }}>
+          🔧 SharePoint Context
+        </h3>
+        <div style={{ display: 'grid', gap: '8px', fontSize: '14px' }}>
+          <div>
+            <strong>Site:</strong> {context.pageContext.web.title}
+          </div>
+          <div>
+            <strong>User:</strong> {context.pageContext.user.displayName}
+          </div>
+          <div>
+            <strong>Environment:</strong> SharePoint 2019 On-Premise
+          </div>
+          <div>
+            <strong>SPFx Version:</strong> 1.4.1
+          </div>
+          <div style={{ 
+            marginTop: '10px',
+            padding: '10px',
+            background: '#d4edda',
+            borderRadius: '4px',
+            color: '#155724'
+          }}>
+            <strong>🎉 React 17 Successfully Forced!</strong>
+            <div style={{ fontSize: '12px', marginTop: '4px' }}>
+              Modern React patterns running in legacy SharePoint environment
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

@@ -4,58 +4,47 @@
   "private": true,
   "main": "lib/index.js",
   "engines": {
-    "node": ">=0.10.0"
+    "node": ">=8.9.4 <9.0.0 || >=10.15.1 <11.0.0"
   },
   "scripts": {
-    "serve:de": "gulp serve --nobrowser --locale=de-de",
-    "serve:us": "gulp serve --nobrowser --locale=en-us",
-    "build:dev": "gulp bundle",
+    "build": "gulp bundle",
+    "clean": "gulp clean",
+    "test": "gulp test",
+    "serve": "gulp bundle --custom-serve && gulp serve --custom-serve",
+    "serve:de": "gulp bundle --custom-serve --locale=de-de && gulp serve --custom-serve --locale=de-de",
+    "serve:us": "gulp bundle --custom-serve --locale=en-us && gulp serve --custom-serve --locale=en-us",
+    "build:dev": "gulp bundle --ship=false",
     "build:prod": "gulp bundle --ship",
-    "clean": "rimraf -rf dist lib temp sharepoint",
-    "build": "npm run build:prod",
     "package": "gulp package-solution --ship",
-    "test": "jest --transformIgnorePatterns \"node_modules/(?!spfx-template)/\" --env=jsdom",
-    "serve": "npm run serve:de",
-    "release": "npm run clean && npm run build && npm run package"
+    "release": "gulp clean && gulp bundle --ship && gulp package-solution --ship"
   },
   "dependencies": {
-    "@fluentui/react": "^8.110.4",
-    "@microsoft/sp-core-library": "~1.4.0",
-    "@microsoft/sp-lodash-subset": "~1.4.0",
-    "@microsoft/sp-office-ui-fabric-core": "~1.4.0",
-    "@microsoft/sp-webpart-base": "~1.4.0",
-    "@pnp/common": "^2.0.9",
-    "@pnp/logging": "^2.0.9",
-    "@pnp/odata": "^2.0.9",
-    "@pnp/sp": "^2.0.9",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2"
-  },
-  "resolutions": {
-    "@types/react": "17.0.2"
+    "@microsoft/sp-core-library": "1.4.1",
+    "@microsoft/sp-lodash-subset": "1.4.1",
+    "@microsoft/sp-office-ui-fabric-core": "1.4.1",
+    "@microsoft/sp-property-pane": "1.4.1",
+    "@microsoft/sp-webpart-base": "1.4.1",
+    "@pnp/logging": "1.3.11",
+    "@pnp/sp": "1.3.11",
+    "office-ui-fabric-react": "5.110.0",
+    "react": "17.0.2",
+    "react-dom": "17.0.2",
+    "zustand": "^4.3.8"
   },
   "devDependencies": {
-    "@microsoft/sp-build-web": "~1.4.1",
-    "@microsoft/sp-module-interfaces": "~1.4.1",
-    "@microsoft/sp-webpart-workbench": "~1.4.1",
-    "@testing-library/react": "^12.1.5",
-    "@types/chai": "3.4.34",
-    "@types/es6-promise": "0.0.33",
-    "@types/mocha": "2.2.38",
-    "@types/react": "^17.0.2",
-    "@types/react-dom": "^17.0.2",
+    "@microsoft/sp-build-web": "1.4.1",
+    "@microsoft/sp-module-interfaces": "1.4.1",
+    "@microsoft/sp-webpart-workbench": "1.4.1",
+    "@types/react": "17.0.43",
+    "@types/react-dom": "17.0.14",
     "@types/webpack-env": "1.13.1",
-    "@typescript-eslint/eslint-plugin": "^5.60.1",
-    "@typescript-eslint/parser": "^5.60.1",
-    "ajv": "~5.2.2",
-    "eslint": "^7.32.0",
-    "eslint-plugin-react": "^7.32.2",
-    "fancy-log": "^2.0.0",
     "gulp": "~3.9.1",
-    "gulp-eslint": "^6.0.0",
-    "jest": "^24.9.0",
-    "rimraf": "^3.0.2",
-    "terser-webpack-plugin-legacy": "^1.2.5",
-    "typescript": "^4.9.5"
+    "typescript": "2.4.2"
+  },
+  "resolutions": {
+    "react": "17.0.2",
+    "react-dom": "17.0.2",
+    "@types/react": "17.0.43",
+    "@types/react-dom": "17.0.14"
   }
 }
