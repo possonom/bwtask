@@ -6,7 +6,12 @@ import {
   DirectionalHint,
   ContextualMenu,
   ICommandBarItemProps,
+  DefaultButton,
+  Icon,
+  Stack,
+  Text,
 } from '@fluentui/react';
+import { fluentTheme } from '../../../theme/fluentTheme';
 
 export interface ICommandBarSampleDropDownProps extends ICommandBarItemProps {
   text: string;
@@ -76,26 +81,41 @@ export const CommandBarSampleDropDown: React.FC<ICommandBarSampleDropDownProps> 
     target: target,
     onDismiss: onMenuDismiss,
     directionalHint: DirectionalHint.bottomLeftEdge,
+    styles: {
+      root: {
+        backgroundColor: fluentTheme.semanticColors.bodyBackground,
+        border: `1px solid ${fluentTheme.semanticColors.inputBorder}`,
+        borderRadius: '4px',
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+      },
+    },
   };
 
   return (
     <>
-      <button
+      <DefaultButton
         onClick={onButtonClick}
         title={props.tooltipText}
-        style={{
-          background: 'transparent',
-          border: 'none',
-          cursor: 'pointer',
-          padding: '8px 12px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '4px',
+        styles={{
+          root: {
+            backgroundColor: 'transparent',
+            border: 'none',
+            minWidth: 'auto',
+            padding: '8px 12px',
+          },
+          rootHovered: {
+            backgroundColor: fluentTheme.semanticColors.buttonBackgroundHovered,
+          },
+          rootPressed: {
+            backgroundColor: fluentTheme.semanticColors.buttonBackgroundPressed,
+          },
         }}
       >
-        <span>{props.text}</span>
-        <i className="ms-Icon ms-Icon--ChevronDown" style={{ fontSize: '12px' }} />
-      </button>
+        <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 4 }}>
+          <Text variant="medium">{props.text}</Text>
+          <Icon iconName="ChevronDown" styles={{ root: { fontSize: '12px' } }} />
+        </Stack>
+      </DefaultButton>
       {isMenuVisible && <ContextualMenu {...contextualMenuProps} />}
     </>
   );
